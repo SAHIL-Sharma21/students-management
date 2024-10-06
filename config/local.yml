@@ -1,0 +1,9 @@
+# writing local configuration file to be used in local development
+
+env: "dev"
+# database configuration
+storage_path: "storage/storage.db"
+# server configuration 
+http_server: 
+  address: "localhost:8085"
+  
