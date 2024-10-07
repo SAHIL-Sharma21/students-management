@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"log/slog"
 	"net/http"
@@ -32,7 +31,7 @@ func main() {
 		Handler: router,
 	}
 
-	fmt.Printf("server stared at %s", cfg.Address)
+	slog.Info("Server started", slog.String("address", cfg.Address))
 
 	//NOTE:production mei gracfuly shutdown krna hai server ko agr interrupt signal aata hai toh
 	//running the server in goroutine
