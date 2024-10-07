@@ -11,7 +11,7 @@ import (
 )
 
 type HttpServer struct {
-	Address string
+	Address string `yaml:"address" env-required:"true"`
 }
 
 /*
