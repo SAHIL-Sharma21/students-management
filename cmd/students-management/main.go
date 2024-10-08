@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/SAHIL-Sharma21/students-management/pkg/config"
+	"github.com/SAHIL-Sharma21/students-management/pkg/http/handlers/student"
 )
 
 func main() {
@@ -22,9 +23,7 @@ func main() {
 	//setup router
 	router := http.NewServeMux()
 
-	router.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("welcome to students management"))
-	})
+	router.HandleFunc("POST /api/v1/students", student.New())
 	//server setup
 	server := http.Server{
 		Addr:    cfg.Address,
