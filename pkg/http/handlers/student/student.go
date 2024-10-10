@@ -10,11 +10,14 @@ import (
 
 	"github.com/SAHIL-Sharma21/students-management/pkg/types"
 	"github.com/SAHIL-Sharma21/students-management/pkg/utils/response"
+	"github.com/go-playground/validator/v10"
 )
 
 // all crud operations
 func New() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+
+		slog.Info("creating a student")
 
 		var student types.Student
 
@@ -25,11 +28,19 @@ func New() http.HandlerFunc {
 			return
 		}
 
-		slog.Info("creating a student")
+		if err != nil {
+			response.WriteJson(w, http.StatusBadRequest, response.GeneralError(err))
+			return
+		}
+
+		//validate the request -> in prodution we need to do this important
+		if err := validator.New().Struct(student); err != nil {
+			validateErr := err.(validator.ValidationErrors) //type caste
+			response.WriteJson(w, http.StatusBadRequest, response.ValidationError(validateErr))
+			return
+		}
 
 		//json data to serialize means struct ke ander daal paaye
-
-		// w.Write([]byte("welcome to students management"))
-		response.WriteJson(w, http.StatusCreated, student)
+		response.WriteJson(w, http.StatusCreated, map[string]string{"sucess": "student created"})
 	}
 }
