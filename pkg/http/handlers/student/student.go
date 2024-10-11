@@ -8,13 +8,14 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/SAHIL-Sharma21/students-management/pkg/storage"
 	"github.com/SAHIL-Sharma21/students-management/pkg/types"
 	"github.com/SAHIL-Sharma21/students-management/pkg/utils/response"
 	"github.com/go-playground/validator/v10"
 )
 
 // all crud operations
-func New() http.HandlerFunc {
+func New(storage storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		slog.Info("creating a student")
