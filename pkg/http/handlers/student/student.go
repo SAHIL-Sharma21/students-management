@@ -41,7 +41,17 @@ func New(storage storage.Storage) http.HandlerFunc {
 			return
 		}
 
+		//create student
+		lastId, err := storage.CreateStudent(student.Name, student.Email, student.Age)
+
+		if err != nil {
+			response.WriteJson(w, http.StatusInternalServerError, err)
+			return
+		}
+
+		slog.Info("Student created successfully", slog.String("userId", fmt.Sprint(lastId)))
+
 		//json data to serialize means struct ke ander daal paaye
-		response.WriteJson(w, http.StatusCreated, map[string]string{"sucess": "student created"})
+		response.WriteJson(w, http.StatusCreated, map[string]int64{"id": lastId})
 	}
 }

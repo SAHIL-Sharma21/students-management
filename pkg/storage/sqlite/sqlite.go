@@ -40,5 +40,26 @@ func New(cfg *config.Config) (*Sqlite, error) {
 
 // struct is implementing the interface
 func (s *Sqlite) CreateStudent(name, email string, age int) (int64, error) {
-	return 0, nil
+	//inserting to db
+	//query create
+	query := `INSERT INTO students (name, email, age) VALUES (?, ?, ?);`
+
+	stmt, err := s.Db.Prepare(query)
+	if err != nil {
+		return 0, err
+	}
+	defer stmt.Close()
+
+	//execute query
+	result, err := stmt.Exec(name, email, age)
+	if err != nil {
+		return 0, err
+	}
+
+	lastId, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	return lastId, nil
 }
