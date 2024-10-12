@@ -7,6 +7,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"strconv"
 
 	"github.com/SAHIL-Sharma21/students-management/pkg/storage"
 	"github.com/SAHIL-Sharma21/students-management/pkg/types"
@@ -53,5 +54,39 @@ func New(storage storage.Storage) http.HandlerFunc {
 
 		//json data to serialize means struct ke ander daal paaye
 		response.WriteJson(w, http.StatusCreated, map[string]int64{"id": lastId})
+	}
+}
+
+func GetById(storage storage.Storage) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		id := r.PathValue("id")
+
+		slog.Info("Getting user by Id", slog.String("userId", id))
+
+		//converting str to int64
+		userId, err := strconv.ParseInt(id, 10, 64)
+
+		if err != nil {
+			slog.Error("Error converting string to int64", slog.String("id", id))
+			response.WriteJson(w, http.StatusBadRequest, response.GeneralError(err))
+			return
+		}
+
+		student, err := storage.GetStudentById(userId)
+
+		if err != nil {
+			slog.Error("Error gettinf user by id", slog.String("id", id))
+			response.WriteJson(w, http.StatusInternalServerError, response.GeneralError(err))
+			return
+		}
+		slog.Info("User found with the given id", slog.String("id", id))
+		response.WriteJson(w, http.StatusOK, student)
+	}
+}
+
+func DeleteById(storage storage.Storage) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
 	}
 }

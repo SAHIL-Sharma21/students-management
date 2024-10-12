@@ -2,8 +2,10 @@ package sqlite
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/SAHIL-Sharma21/students-management/pkg/config"
+	"github.com/SAHIL-Sharma21/students-management/pkg/types"
 	_ "github.com/mattn/go-sqlite3" //drivers for sqlite
 )
 
@@ -62,4 +64,33 @@ func (s *Sqlite) CreateStudent(name, email string, age int) (int64, error) {
 	}
 
 	return lastId, nil
+}
+
+func (s *Sqlite) GetStudentById(id int64) (types.Student, error) {
+	//query
+	query := `SELECT * FROM students WHERE id = ? LIMIT 1;`
+
+	stmt, err := s.Db.Prepare(query)
+
+	if err != nil {
+		return types.Student{}, err
+	}
+
+	defer stmt.Close()
+
+	//serilizing with the student struct
+	var student types.Student
+
+	//execute query
+	//scan will add the data from the database in struct
+	err = stmt.QueryRow(id).Scan(&student.Id, &student.Name, &student.Email, &student.Age)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return types.Student{}, fmt.Errorf("no student found with the given id: %s", fmt.Sprint(id))
+		}
+		return types.Student{}, fmt.Errorf("query error: %w", err)
+	}
+
+	return student, nil
 }
