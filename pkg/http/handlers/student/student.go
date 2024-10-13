@@ -76,12 +76,28 @@ func GetById(storage storage.Storage) http.HandlerFunc {
 		student, err := storage.GetStudentById(userId)
 
 		if err != nil {
-			slog.Error("Error gettinf user by id", slog.String("id", id))
+			slog.Error("Error getting user by id", slog.String("id", id))
 			response.WriteJson(w, http.StatusInternalServerError, response.GeneralError(err))
 			return
 		}
 		slog.Info("User found with the given id", slog.String("id", id))
 		response.WriteJson(w, http.StatusOK, student)
+	}
+}
+
+func GetListOfStudents(storage storage.Storage) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		slog.Info("Getting list of students")
+
+		students, err := storage.GetListOfStudents()
+
+		if err != nil {
+			slog.Error("Error getting list of students", slog.String("error", err.Error()))
+			response.WriteJson(w, http.StatusInternalServerError, err)
+		}
+
+		slog.Info("List of students fetched successfully", slog.String("count", fmt.Sprintf("%d", len(students))))
+		response.WriteJson(w, http.StatusOK, students)
 	}
 }
 
