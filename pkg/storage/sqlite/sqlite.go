@@ -135,3 +135,38 @@ func (s *Sqlite) GetListOfStudents() ([]types.Student, error) {
 
 	return students, nil
 }
+
+func (s *Sqlite) UpdateStudent(id int64, name string, email string, age int) (int64, error) {
+	query := `UPDATE students SET name = ?, email = ?, age = ? WHERE id = ? ;`
+
+	stmt, err := s.Db.Prepare(query)
+
+	if err != nil {
+		return 0, err
+	}
+
+	defer stmt.Close()
+
+	//execute the query
+	result, err := stmt.Exec(name, email, age, id)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+
+	if err != nil {
+		return 0, err
+	}
+
+	if rowsAffected == 0 {
+		return 0, fmt.Errorf("error updating studnent with id: %s", fmt.Sprint(id))
+	}
+
+	return rowsAffected, nil
+
+}
+
+func (s *Sqlite) DeleteStudentById(id int64) error {
+	return nil
+}

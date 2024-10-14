@@ -101,7 +101,51 @@ func GetListOfStudents(storage storage.Storage) http.HandlerFunc {
 	}
 }
 
-func DeleteById(storage storage.Storage) http.HandlerFunc {
+func UpdateStudent(storage storage.Storage) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		slog.Info("Updating student details", slog.String("userId", r.PathValue("id")))
+
+		//id
+		id := r.PathValue("id")
+
+		//convereting to int64
+		userId, err := strconv.ParseInt(id, 10, 64)
+
+		if err != nil {
+			slog.Error("Error converting string to int64", slog.String("id", id))
+			response.WriteJson(w, http.StatusBadRequest, response.GeneralError(err))
+			return
+		}
+
+		var student types.Student
+
+		//take data aand parse
+		if err := json.NewDecoder(r.Body).Decode(&student); err != nil {
+			response.WriteJson(w, http.StatusBadRequest, response.GeneralError(err))
+			return
+		}
+
+		//validate the request -> in prodution we need to do this important
+		if err := validator.New().Struct(student); err != nil {
+			validateErr := err.(validator.ValidationErrors)
+			response.WriteJson(w, http.StatusBadRequest, response.ValidationError(validateErr))
+			return
+		}
+
+		//update student
+		updatedStudent, err := storage.UpdateStudent(userId, student.Name, student.Email, student.Age)
+
+		if err != nil {
+			response.WriteJson(w, http.StatusInternalServerError, response.GeneralError(err))
+			return
+		}
+		slog.Info("Student updated successfully", slog.String("id", id))
+		response.WriteJson(w, http.StatusOK, map[string]int64{"id": updatedStudent})
+	}
+}
+
+func DeleteStudentById(storage storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 	}
