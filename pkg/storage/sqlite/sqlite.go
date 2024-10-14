@@ -168,5 +168,30 @@ func (s *Sqlite) UpdateStudent(id int64, name string, email string, age int) (in
 }
 
 func (s *Sqlite) DeleteStudentById(id int64) error {
+	query := `DELETE FROM students WHERE id = ?;`
+
+	stmt, err := s.Db.Prepare(query)
+
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	//execute the query
+	result, err := stmt.Exec(id)
+	if err != nil {
+		return err
+	}
+
+	isDeleted, err := result.RowsAffected()
+
+	if err != nil {
+		return err
+	}
+
+	if isDeleted == 0 {
+		return fmt.Errorf("no student found with the given id: %s", fmt.Sprint(id))
+	}
+
 	return nil
 }

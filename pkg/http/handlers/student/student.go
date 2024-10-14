@@ -122,12 +122,14 @@ func UpdateStudent(storage storage.Storage) http.HandlerFunc {
 
 		//take data aand parse
 		if err := json.NewDecoder(r.Body).Decode(&student); err != nil {
+			slog.Info("Error while decoding request body", slog.String("id", id))
 			response.WriteJson(w, http.StatusBadRequest, response.GeneralError(err))
 			return
 		}
 
 		//validate the request -> in prodution we need to do this important
 		if err := validator.New().Struct(student); err != nil {
+			slog.Info("Error while validating request body", slog.String("id", id))
 			validateErr := err.(validator.ValidationErrors)
 			response.WriteJson(w, http.StatusBadRequest, response.ValidationError(validateErr))
 			return
@@ -137,6 +139,7 @@ func UpdateStudent(storage storage.Storage) http.HandlerFunc {
 		updatedStudent, err := storage.UpdateStudent(userId, student.Name, student.Email, student.Age)
 
 		if err != nil {
+			slog.Info("Error while updating student", slog.String("id", id))
 			response.WriteJson(w, http.StatusInternalServerError, response.GeneralError(err))
 			return
 		}
@@ -147,6 +150,27 @@ func UpdateStudent(storage storage.Storage) http.HandlerFunc {
 
 func DeleteStudentById(storage storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		slog.Info("Deleting student witht the id", slog.String("userId", r.PathValue("id")))
 
+		id := r.PathValue("id")
+
+		//converting to int64
+		userId, err := strconv.ParseInt(id, 10, 64)
+		if err != nil {
+			slog.Info("error while converting id to int64", slog.String("id", id))
+			response.WriteJson(w, http.StatusBadRequest, response.GeneralError(err))
+			return
+		}
+
+		//delete route
+		err = storage.DeleteStudentById(userId)
+
+		if err != nil {
+			slog.Info("Error while deleting student", slog.String("id", id))
+			response.WriteJson(w, http.StatusInternalServerError, response.GeneralError(err))
+			return
+		}
+		slog.Info("Student deleted successfully form the database", slog.String("id", id))
+		response.WriteJson(w, http.StatusOK, map[string]string{"message": "Student deleted successfully."})
 	}
 }
